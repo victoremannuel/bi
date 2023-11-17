@@ -27,6 +27,7 @@ def run():
     st.set_page_config(
         page_title="Hello",
         page_icon="👋",
+        layout="wide"
     )
 
     st.write("# Welcome to Streamlit! 👋")
@@ -36,7 +37,7 @@ def run():
     # st.markdown(
         
     # )
-    st.set_page_config(layout="wide") #comando para usar a pagina toda
+    # st.set_page_config(layout="wide") #comando para usar a pagina toda
 
     #-----------------------------
     #TRATAMENTO DE DADOS
