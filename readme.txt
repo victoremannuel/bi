@@ -12,7 +12,7 @@ IMPORTAÇOES
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-
+ 
 GIT
 $ git config --global user.name "Fulano de Tal"
 $ git config --global user.email fulanodetal@exemplo.br
