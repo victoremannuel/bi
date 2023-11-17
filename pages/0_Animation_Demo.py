@@ -15,70 +15,59 @@
 from typing import Any
 
 import numpy as np
+import pandas as pd
+import plotly.express as px
 
 import streamlit as st
 from streamlit.hello.utils import show_code
 
 
 def animation_demo() -> None:
+    st.set_page_config(
+        page_title="Hello",
+        page_icon="👋",
+        layout="wide" #comando para usar a pagina toda
+    )
 
     # Interactive Streamlit elements, like these sliders, return their value.
-    # This gives you an extremely simple interaction model.
-    iterations = st.sidebar.slider("Level of detail", 2, 20, 10, 1)
-    separation = st.sidebar.slider("Separation", 0.7, 2.0, 0.7885)
+    #-----------------------------
+    #TRATAMENTO DE DADOS
+    df = pd.read_csv("dados.csv", sep=";", decimal=",") #lendo o arquivo csv
+    df["Date"] = pd.to_datetime(df["Date"]) #convertendo a colina Date para formato de data
+    df = df.sort_values("Date") #ordenando por data
+    df["Mês"] = df["Date"].apply(lambda x: str(x.year) + "-" + str(x.month)) #criando uma coluna mes para concatenar mes e ano extraindo da coluna date original usando a lambida, uma funcao de uma linha so
 
-    # Non-interactive elements return a placeholder to their location
-    # in the app. Here we're storing progress_bar to update it later.
-    progress_bar = st.sidebar.progress(0)
+    #-----------------------------
+    #MENU LATERAL
+    #filtros
+    mouth = st.sidebar.selectbox("Mês", df["Mês"].unique())
+    df_filtrado = df[df["Mês"] == mouth]
 
-    # These two elements will be filled in later, so we create a placeholder
-    # for them using st.empty()
-    frame_text = st.sidebar.empty()
-    image = st.empty()
+    #-----------------------------
+    #LAYOUT
+    caixa1, caixa2 = st.columns(2)
+    caixa3, caixa4, caixa5 = st.columns(3)
 
-    m, n, s = 960, 640, 400
-    x = np.linspace(-m / s, m / s, num=m).reshape((1, m))
-    y = np.linspace(-n / s, n / s, num=n).reshape((n, 1))
+    #-----------------------------
+    #GRÁFICOS
+    grafico_data_faturamento = px.bar(df_filtrado, x="Date", y="Total", color="City", title="Faturamento do mês")
 
-    for frame_num, a in enumerate(np.linspace(0.0, 4 * np.pi, 100)):
-        # Here were setting value for these two elements.
-        progress_bar.progress(frame_num)
-        frame_text.text("Frame %i/100" % (frame_num + 1))
+    grafico_data_produto = px.bar(df_filtrado, x="Date", y="Product line", color="City", orientation="h", title="Faturamento por tipo de produto")
 
-        # Performing some fractal wizardry.
-        c = separation * np.exp(1j * a)
-        Z = np.tile(x, (n, 1)) + 1j * np.tile(y, (1, m))
-        C = np.full((n, m), c)
-        M: Any = np.full((n, m), True, dtype=bool)
-        N = np.zeros((n, m))
+    total_cidade = df_filtrado.groupby("City")[["Total"]].sum().reset_index()
+    grafico_volume_cidade = px.bar(total_cidade, x="City", y="Total", title="Faturamento por filial")
 
-        for i in range(iterations):
-            Z[M] = Z[M] * Z[M] + C[M]
-            M[np.abs(Z) > 2] = False
-            N[M] = i
+    grafico_tipo_pagamento = px.pie(df_filtrado, values="Total", names="Payment", title="Faturamento por tipo de pagamento")
 
-        # Update the image placeholder by calling the image() function on it.
-        image.image(1.0 - (N / N.max()), use_column_width=True)
+    ranking = df_filtrado.groupby("City")[["Rating"]].mean().reset_index()
+    grafico_ranking_cidade = px.bar(ranking, x="City", y="Rating", title="Avaliação")
 
-    # We clear elements by calling empty on them.
-    progress_bar.empty()
-    frame_text.empty()
-
-    # Streamlit widgets automatically run the script from top to bottom. Since
-    # this button is not connected to any other logic, it just causes a plain
-    # rerun.
-    st.button("Re-run")
-
-
-st.set_page_config(page_title="Animation Demo", page_icon="📹")
-st.markdown("# Animation Demo")
-st.sidebar.header("Animation Demo")
-st.write(
-    """This app shows how you can use Streamlit to build cool animations.
-It displays an animated fractal based on the the Julia Set. Use the slider
-to tune different parameters."""
-)
+    #-----------------------------
+    #IMPRIMINDO
+    caixa1.plotly_chart(grafico_data_faturamento, use_container_width=True)
+    caixa2.plotly_chart(grafico_data_produto, use_container_width=True)
+    caixa3.plotly_chart(grafico_volume_cidade, use_container_width=True)
+    caixa4.plotly_chart(grafico_tipo_pagamento, use_container_width=True)
+    caixa5.plotly_chart(grafico_ranking_cidade, use_container_width=True)
 
 animation_demo()
-
-show_code(animation_demo)
