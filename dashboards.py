@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import subprocess
+subprocess.run(["pip", "install", "plotly"])
 
 st.set_page_config(layout="wide") #comando para usar a pagina toda
 
