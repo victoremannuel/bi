@@ -6,7 +6,7 @@ pip3 install streamlit
 pip3 install plotly
 pip3 install pandas
 pip3 install watchdog
-streamlit run meuarquivo.py
+streamlit run Hello.py
 
 IMPORTAÇOES
 import streamlit as st
